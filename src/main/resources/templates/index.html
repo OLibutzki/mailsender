@@ -1,0 +1,74 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mail sender</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+</head>
+<body>
+	<div class="container-md">
+		<nav class="navbar navbar-light bg-light">
+			<div class="container-fluid">
+				<form class="d-flex" name="logout_form" method="post"
+					th:action="@{/sso/logout}">
+					<button class="btn btn-outline-success" type="submit"
+						id="logout_button">Logout</button>
+				</form>
+			</div>
+		</nav>
+		<div class="card">
+			<div class="card-body">
+				<h2 class="card-title">New mail</h2>
+				<form id="new-mail-form" th:action="@{/}" method="post"
+					th:object="${mail}">
+					<div class="mb-3">
+						<label for="recipient">Recipient</label> <input type="text"
+							class="form-control" id="recipient" name="recipient"
+							placeholder="Enter email">
+					</div>
+					<div class="mb-3">
+						<label for="subject">Subject</label> <input type="text"
+							class="form-control" id="subject" name="subject"
+							placeholder="Enter subject">
+					</div>
+					<div class="mb-3">
+						<label for="body">Body</label>
+						<textarea class="form-control" id="body" name="body"
+							placeholder="Enter body"></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary">Send mail</button>
+				</form>
+			</div>
+		</div>
+		<div class="card">
+			<div class="card-body">
+				<h2 class="card-title">Sent mails</h2>
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Recipient</th>
+							<th scope="col">Subject</th>
+							<th scope="col">Body</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="sentMail : ${sentMails}">
+							<td th:text="${sentMail.recipient}"></td>
+							<td th:text="${sentMail.subject}"></td>
+							<td th:text="${sentMail.body}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+<script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+</html>
