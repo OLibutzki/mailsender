@@ -17,8 +17,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(keycloakAuthenticationProvider());
+	public void configureGlobal( final AuthenticationManagerBuilder auth ) throws Exception {
+		auth.authenticationProvider( keycloakAuthenticationProvider( ) );
 	}
 
 	/**
@@ -26,19 +26,19 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	@Override
-	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-		return new RegisterSessionAuthenticationStrategy(buildSessionRegistry());
+	protected SessionAuthenticationStrategy sessionAuthenticationStrategy( ) {
+		return new RegisterSessionAuthenticationStrategy( buildSessionRegistry( ) );
 	}
 
 	@Bean
-	protected SessionRegistry buildSessionRegistry() {
-		return new SessionRegistryImpl();
+	protected SessionRegistry buildSessionRegistry( ) {
+		return new SessionRegistryImpl( );
 	}
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		super.configure(http);
-		http.authorizeRequests().anyRequest().authenticated().and().logout().addLogoutHandler(keycloakLogoutHandler())
-				.logoutUrl("/sso/logout").permitAll().logoutSuccessUrl("/logout-successful");
+	protected void configure( final HttpSecurity http ) throws Exception {
+		super.configure( http );
+		http.authorizeRequests( ).anyRequest( ).authenticated( ).and( ).logout( ).addLogoutHandler( keycloakLogoutHandler( ) )
+				.logoutUrl( "/sso/logout" ).permitAll( ).logoutSuccessUrl( "/logout-successful" );
 	}
 }

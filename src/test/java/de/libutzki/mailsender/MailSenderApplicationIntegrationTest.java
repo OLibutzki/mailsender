@@ -1,5 +1,8 @@
 package de.libutzki.mailsender;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 import java.nio.file.Path;
@@ -26,7 +29,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
@@ -35,144 +37,151 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.libutzki.mailsender.KeycloakClient.RealmClient;
 import io.restassured.RestAssured;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.*;
-
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
 @Testcontainers
 class MailSenderApplicationIntegrationTest {
 
 	@Container
-	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.1")
-			.withUsername("postgres")
-			.withPassword("test");
+	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>( "postgres:14.1" )
+			.withUsername( "postgres" )
+			.withPassword( "test" );
 
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:17.0.0")
-			.withAccessToHost(true);
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" )
+			.withAccessToHost( true );
 
 	@Container
-	static GenericContainer<?> chrome = new GenericContainer<>(
-			DockerImageName.parse("browserless/chrome:1.51.1-chrome-stable"))
-					.withExtraHost("host.docker.internal", "host-gateway").withAccessToHost(true).withExposedPorts(3000)
-					.waitingFor(Wait.forHttp("/"));
-
+	static GenericContainer<?> chrome = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.51.1-chrome-stable" ) )
+			.withExtraHost( "host.docker.internal", "host-gateway" )
+			.withAccessToHost( true )
+			.withExposedPorts( 3000 )
+			.waitingFor( Wait.forHttp( "/" ) );
 
 	private static final Integer MAILHOG_SMTP_PORT = 1025;
 	private static final Integer MAILHOG_HTTP_PORT = 8025;
-	
+
 	@Container
-	static GenericContainer<?> mailhogContainer = new GenericContainer<>("mailhog/mailhog:v1.0.1")
-		.withExposedPorts( MAILHOG_SMTP_PORT, MAILHOG_HTTP_PORT )
+	static GenericContainer<?> mailhogContainer = new GenericContainer<>( "mailhog/mailhog:v1.0.1" )
+			.withExposedPorts( MAILHOG_SMTP_PORT, MAILHOG_HTTP_PORT )
 			.waitingFor( Wait.forHttp( "/" ).forPort( MAILHOG_HTTP_PORT ) );
-	
+
 	@LocalServerPort
 	private Integer port;
 
 	private static final String hostname = "host.docker.internal";
 
-	private static final Path screenshotPath = Paths.get("target", "playwright");
+	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
 
-	private static final User user1 = new User("user1", "bmbm");
+	private static final User user1 = new User( "user1", "bmbm" );
 
 	@DynamicPropertySource
-	static void configurePostgres(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", postgres::getJdbcUrl);
-		registry.add("spring.datasource.username", postgres::getUsername);
-		registry.add("spring.datasource.password", postgres::getPassword);
+	static void configurePostgres( final DynamicPropertyRegistry registry ) {
+		registry.add( "spring.datasource.url", postgres::getJdbcUrl );
+		registry.add( "spring.datasource.username", postgres::getUsername );
+		registry.add( "spring.datasource.password", postgres::getPassword );
 	}
 
 	@DynamicPropertySource
-	static void configureKeycloak(DynamicPropertyRegistry registry) {
-		registry.add("keycloak.auth-server-url", MailSenderApplicationIntegrationTest::getAuthServerURL);
-	}
-	
-	@DynamicPropertySource
-	static void configureMail(DynamicPropertyRegistry registry) {
-		registry.add("spring.mail.host", mailhogContainer::getHost);
-		registry.add("spring.mail.properties.mail.smtp.port", () -> mailhogContainer.getMappedPort(MAILHOG_SMTP_PORT));
+	static void configureKeycloak( final DynamicPropertyRegistry registry ) {
+		registry.add( "keycloak.auth-server-url", MailSenderApplicationIntegrationTest::getAuthServerURL );
 	}
 
-	private static String getAuthServerURL() {
-		return String.format("http://%s:%s%s", hostname, keycloakContainer.getHttpPort(),
-				keycloakContainer.getContextPath());
+	@DynamicPropertySource
+	static void configureMail( final DynamicPropertyRegistry registry ) {
+		registry.add( "spring.mail.host", mailhogContainer::getHost );
+		registry.add( "spring.mail.properties.mail.smtp.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
+	}
+
+	private static String getAuthServerURL( ) {
+		return String.format(
+				"http://%s:%s%s",
+				hostname,
+				keycloakContainer.getHttpPort( ),
+				keycloakContainer.getContextPath( ) );
 	}
 
 	@BeforeEach
-	void init(@Autowired KeycloakSpringBootProperties keycloakProperties) {
-		exposeHostPorts(port);
-		try (KeycloakClient keycloakClient = new KeycloakClient(KeycloakBuilder.builder()
-				.serverUrl(keycloakContainer.getAuthServerUrl()).grantType(OAuth2Constants.PASSWORD)
-				.realm(KeycloakContainer.MASTER_REALM).clientId(KeycloakContainer.ADMIN_CLI_CLIENT)
-				.username(keycloakContainer.getAdminUsername()).password(keycloakContainer.getAdminPassword())
-				.resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build()).build())) {
-			final RealmClient realm = keycloakClient.createRealm(keycloakProperties.getRealm());
-			realm.createClient(keycloakProperties.getResource(), String.format("http://%s:%s/*", hostname, port));
-			realm.createUser(user1);
+	void init( @Autowired final KeycloakSpringBootProperties keycloakProperties ) {
+		exposeHostPorts( port );
+		try ( KeycloakClient keycloakClient = new KeycloakClient(
+				KeycloakBuilder
+						.builder( )
+						.serverUrl( keycloakContainer.getAuthServerUrl( ) )
+						.grantType( OAuth2Constants.PASSWORD )
+						.realm( KeycloakContainer.MASTER_REALM )
+						.clientId( KeycloakContainer.ADMIN_CLI_CLIENT )
+						.username( keycloakContainer.getAdminUsername( ) )
+						.password( keycloakContainer.getAdminPassword( ) )
+						.resteasyClient(
+								new ResteasyClientBuilder( )
+										.connectionPoolSize( 10 )
+										.build( ) )
+						.build( ) ) ) {
+			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
+			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
+			realm.createUser( user1 );
 
 		}
 	}
-	
+
 	@BeforeEach
-	void setupRestAssured() {
-        RestAssured.baseURI = "http://" + mailhogContainer.getHost();
-        RestAssured.port = mailhogContainer.getMappedPort(MAILHOG_HTTP_PORT);
-        RestAssured.basePath = "/api/v2";
+	void setupRestAssured( ) {
+		RestAssured.baseURI = "http://" + mailhogContainer.getHost( );
+		RestAssured.port = mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT );
+		RestAssured.basePath = "/api/v2";
 	}
 
 	@Test
-	void testApplication() {
+	void testApplication( ) {
 
-		try (Playwright playwright = Playwright.create()) {
-			Browser browser = playwright.chromium()
-					.connectOverCDP("ws://" + chrome.getHost() + ":" + chrome.getFirstMappedPort() + "");
-			String baseUrl = String.format("http://%s:%s", hostname, port);
-			try (BrowserContext browserContext = browser
-					.newContext(new Browser.NewContextOptions().setRecordVideoDir(Paths.get("target/videos")));
-					Page page = browserContext.newPage()) {
-				page.navigate(baseUrl + "/");
-				page.waitForLoadState();
-				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("login-screen.png")));
-				
+		try ( Playwright playwright = Playwright.create( ) ) {
+			final Browser browser = playwright.chromium( )
+					.connectOverCDP( "ws://" + chrome.getHost( ) + ":" + chrome.getFirstMappedPort( ) + "" );
+			final String baseUrl = String.format( "http://%s:%s", hostname, port );
+			try (
+					BrowserContext browserContext = browser.newContext( new Browser.NewContextOptions( ).setRecordVideoDir( screenshotAndVideoPath ) );
+					Page page = browserContext.newPage( ) ) {
+				page.navigate( baseUrl + "/" );
+				page.waitForLoadState( );
+				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "login-screen.png" ) ) );
+
 				// Login
-				page.locator("id=username").fill(user1.username());
-				page.locator("id=password").fill(user1.password());
-				page.locator("id=kc-login").click();
-				page.waitForLoadState();
-				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-login.png")));
-				
-				// Assert that no mails  been added to sent mails table
-				assertThat(page.locator("#sent-mails-table tbody tr")).hasCount(0);
-				
-			     given().when().get("/messages")
-		            .then().body("total", equalTo(0));
-				
+				page.locator( "id=username" ).fill( user1.username( ) );
+				page.locator( "id=password" ).fill( user1.password( ) );
+				page.locator( "id=kc-login" ).click( );
+				page.waitForLoadState( );
+				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-login.png" ) ) );
+
+				// Assert that no mails been added to sent mails table
+				assertThat( page.locator( "#sent-mails-table tbody tr" ) ).hasCount( 0 );
+
+				given( )
+						.when( ).get( "/messages" )
+						.then( ).body( "total", equalTo( 0 ) );
+
 				// Send mail
-				final String body = 
-						"""
-					     This a a Test-Mail.
-					     It has been sent by an integration test.
-					     """;
-				
-				Mail mail = new Mail("test@example.com", "Test-Mail", body);
-				page.locator("id=recipient").fill(mail.recepient());
-				page.locator("id=subject").fill(mail.subject());
-				page.locator("id=body").fill(mail.body());
-				page.locator("id=send-mail-button").click();
-				
-				
-				assertThat(page.locator("#sent-mails-table tbody tr")).hasCount(1);
-				
-			     given().when().get("/messages")
-		            .then().body("total", equalTo(1));
-				
+				final String body = """
+						This a a Test-Mail.
+						It has been sent by an integration test.
+						""";
+
+				final Mail mail = new Mail( "test@example.com", "Test-Mail", body );
+				page.locator( "id=recipient" ).fill( mail.recepient( ) );
+				page.locator( "id=subject" ).fill( mail.subject( ) );
+				page.locator( "id=body" ).fill( mail.body( ) );
+				page.locator( "id=send-mail-button" ).click( );
+
+				assertThat( page.locator( "#sent-mails-table tbody tr" ) ).hasCount( 1 );
+
+				given( )
+						.when( ).get( "/messages" )
+						.then( ).body( "total", equalTo( 1 ) );
+
 				// Logout
-				page.locator("id=logout_button").click();
-				page.waitForLoadState();
-				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-logout.png")));
-				
-				
+				page.locator( "id=logout_button" ).click( );
+				page.waitForLoadState( );
+				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-logout.png" ) ) );
+
 			}
 		}
 	}

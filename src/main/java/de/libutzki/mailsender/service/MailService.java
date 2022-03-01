@@ -18,31 +18,31 @@ public class MailService {
 	private final JavaMailSender mailSender;
 	private final SentMailRepository sentMailRepository;
 
-	public MailService(JavaMailSender mailSender, SentMailRepository sentMailRepository) {
+	public MailService( final JavaMailSender mailSender, final SentMailRepository sentMailRepository ) {
 		this.mailSender = mailSender;
 		this.sentMailRepository = sentMailRepository;
 	}
 
-	@Transactional(rollbackFor = Exception.class)
-	public void sendMail(String sender, NewMail newMail) {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setFrom(sender);
-		message.setTo(newMail.recipient());
-		message.setSubject(newMail.subject());
-		message.setText(newMail.body());
-		mailSender.send(message);
-		
-		final SentMail sentMail = new SentMail();
-		sentMail.setSender(sender);
-		sentMail.setRecipient(newMail.recipient());
-		sentMail.setSubject(newMail.subject());
-		sentMail.setBody(newMail.body());
-		
-		sentMailRepository.save(sentMail);
+	@Transactional( rollbackFor = Exception.class )
+	public void sendMail( final String sender, final NewMail newMail ) {
+		final SimpleMailMessage message = new SimpleMailMessage( );
+		message.setFrom( sender );
+		message.setTo( newMail.recipient( ) );
+		message.setSubject( newMail.subject( ) );
+		message.setText( newMail.body( ) );
+		mailSender.send( message );
+
+		final SentMail sentMail = new SentMail( );
+		sentMail.setSender( sender );
+		sentMail.setRecipient( newMail.recipient( ) );
+		sentMail.setSubject( newMail.subject( ) );
+		sentMail.setBody( newMail.body( ) );
+
+		sentMailRepository.save( sentMail );
 	}
-	
-	@Transactional(readOnly = true)
-	public List<SentMailDTO> getSentMailsForSender(String sender) {
-		return sentMailRepository.findBySender(sender);
+
+	@Transactional( readOnly = true )
+	public List<SentMailDTO> getSentMailsForSender( final String sender ) {
+		return sentMailRepository.findBySender( sender );
 	}
 }

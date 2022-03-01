@@ -8,16 +8,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
-@PropertySource(value = "classpath:/application.dev.properties", ignoreResourceNotFound = true)
+@PropertySource( value = "classpath:/application.dev.properties", ignoreResourceNotFound = true )
 public class MailSenderApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MailSenderApplication.class, args);
+	public static void main( final String[] args ) {
+		SpringApplication.run( MailSenderApplication.class, args );
 	}
 
 	@Bean
-	public KeycloakConfigResolver KeycloakConfigResolver() {
-		return new KeycloakSpringBootConfigResolver();
+	public KeycloakConfigResolver KeycloakConfigResolver( ) {
+		return new KeycloakSpringBootConfigResolver( );
 	}
 
 }

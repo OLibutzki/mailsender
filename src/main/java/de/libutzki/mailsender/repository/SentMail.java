@@ -11,71 +11,71 @@ import javax.validation.constraints.NotBlank;
 @Entity
 public class SentMail {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+	@Id
+	@GeneratedValue
+	private Long id;
 
-    @NotBlank
-    private String sender;
-    
-    @NotBlank
-    private String recipient;
-    
-    private String subject;
-    
-    private String body;
+	@NotBlank
+	private String sender;
 
-	public String getRecipient() {
+	@NotBlank
+	private String recipient;
+
+	private String subject;
+
+	private String body;
+
+	public String getRecipient( ) {
 		return recipient;
 	}
 
-	public void setRecipient(String recipient) {
+	public void setRecipient( final String recipient ) {
 		this.recipient = recipient;
 	}
 
-	public Optional<String> getSubject() {
-		return Optional.ofNullable(subject);
+	public Optional<String> getSubject( ) {
+		return Optional.ofNullable( subject );
 	}
 
-	public void setSubject(String subject) {
+	public void setSubject( final String subject ) {
 		this.subject = subject;
 	}
 
-	public Optional<String> getBody() {
-		return Optional.ofNullable(body);
+	public Optional<String> getBody( ) {
+		return Optional.ofNullable( body );
 	}
 
-	public void setBody(String body) {
+	public void setBody( final String body ) {
 		this.body = body;
 	}
 
-	public Long getId() {
+	public Long getId( ) {
 		return id;
 	}
 
-	public String getSender() {
+	public String getSender( ) {
 		return sender;
 	}
 
-	public void setSender(String sender) {
+	public void setSender( final String sender ) {
 		this.sender = sender;
 	}
-	
+
 	@Override
-	public int hashCode() {
-		return Objects.hash(id);
+	public int hashCode( ) {
+		return Objects.hash( id );
 	}
-	
+
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
 			return true;
-		if (obj == null)
+		}
+		if ( ( obj == null ) || ( getClass( ) != obj.getClass( ) ) ) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SentMail other = (SentMail) obj;
-		return Objects.equals(id, other.id);
+		}
+		final SentMail other = ( SentMail ) obj;
+		return Objects.equals( id, other.id );
 	}
 
 }

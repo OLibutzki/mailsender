@@ -13,38 +13,38 @@ import de.libutzki.mailsender.model.NewMail;
 import de.libutzki.mailsender.service.MailService;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping( "/" )
 public class MailController {
 
 	private static final String SENDER = "oliver@libutzki.de";
 
 	private final MailService mailService;
 
-	public MailController(MailService mailService) {
+	public MailController( final MailService mailService ) {
 		this.mailService = mailService;
 	}
 
 	@GetMapping
-	public String index(Model model) {
-		addAttributes(model);
+	public String index( final Model model ) {
+		addAttributes( model );
 		return "index";
 	}
-	
-	@GetMapping("logout-successful")
-	public String logoutSuccessful() {
+
+	@GetMapping( "logout-successful" )
+	public String logoutSuccessful( ) {
 		return "redirect:/";
 	}
 
 	@PostMapping
-	public String sendMail(@Valid @ModelAttribute("mail") NewMail mail, Model model) {
-		mailService.sendMail(SENDER, mail);
+	public String sendMail( @Valid @ModelAttribute( "mail" ) final NewMail mail, final Model model ) {
+		mailService.sendMail( SENDER, mail );
 
-		addAttributes(model);
+		addAttributes( model );
 		return "redirect:/";
 	}
 
-	private void addAttributes(Model model) {
-		model.addAttribute("sentMails", mailService.getSentMailsForSender(SENDER));
+	private void addAttributes( final Model model ) {
+		model.addAttribute( "sentMails", mailService.getSentMailsForSender( SENDER ) );
 	}
 
 }

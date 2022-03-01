@@ -17,62 +17,62 @@ class KeycloakClient implements AutoCloseable {
 
 	private final Keycloak keycloak;
 
-	KeycloakClient(Keycloak keycloak) {
+	KeycloakClient( final Keycloak keycloak ) {
 		this.keycloak = keycloak;
 	}
 
-	RealmClient createRealm(String name) {
-		RealmRepresentation mailsenderRealm = new RealmRepresentation();
-		mailsenderRealm.setId(name);
-		mailsenderRealm.setRealm(name);
-		mailsenderRealm.setDisplayName(name);
-		mailsenderRealm.setEnabled(true);
+	RealmClient createRealm( final String name ) {
+		final RealmRepresentation mailsenderRealm = new RealmRepresentation( );
+		mailsenderRealm.setId( name );
+		mailsenderRealm.setRealm( name );
+		mailsenderRealm.setDisplayName( name );
+		mailsenderRealm.setEnabled( true );
 
-		keycloak.realms().create(mailsenderRealm);
-		return new RealmClient(name);
+		keycloak.realms( ).create( mailsenderRealm );
+		return new RealmClient( name );
 	}
 
 	@Override
-	public void close() {
-		keycloak.close();
+	public void close( ) {
+		keycloak.close( );
 	}
 
 	class RealmClient {
-		RealmClient(String realmName) {
-			super();
+		RealmClient( final String realmName ) {
+			super( );
 			this.realmName = realmName;
 		}
 
 		private final String realmName;
 
-		void createClient(String clientName, String redirectURI) {
-			ClientRepresentation mailsenderClient = new ClientRepresentation();
-			mailsenderClient.setId(clientName);
-			mailsenderClient.setClientId(clientName);
-			mailsenderClient.setName(clientName);
-			mailsenderClient.setRedirectUris(singletonList(redirectURI));
+		void createClient( final String clientName, final String redirectURI ) {
+			final ClientRepresentation mailsenderClient = new ClientRepresentation( );
+			mailsenderClient.setId( clientName );
+			mailsenderClient.setClientId( clientName );
+			mailsenderClient.setName( clientName );
+			mailsenderClient.setRedirectUris( singletonList( redirectURI ) );
 			mailsenderClient.setPublicClient( Boolean.TRUE );
-			RealmResource realm = keycloak.realm(realmName);
-			realm.clients().create(mailsenderClient).close();
+			final RealmResource realm = keycloak.realm( realmName );
+			realm.clients( ).create( mailsenderClient ).close( );
 		}
 
-		void createUser(User userToCreate) {
+		void createUser( final User userToCreate ) {
 
-			UserRepresentation user = new UserRepresentation();
-			user.setUsername(userToCreate.username());
-			user.setEnabled(true);
-			RealmResource realm = keycloak.realm(realmName);
-			UsersResource usersResource = realm.users();
+			final UserRepresentation user = new UserRepresentation( );
+			user.setUsername( userToCreate.username( ) );
+			user.setEnabled( true );
+			final RealmResource realm = keycloak.realm( realmName );
+			final UsersResource usersResource = realm.users( );
 			final String userId;
-			try (Response createUserResponse = usersResource.create(user)) {
-				userId = createUserResponse.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+			try ( Response createUserResponse = usersResource.create( user ) ) {
+				userId = createUserResponse.getLocation( ).getPath( ).replaceAll( ".*/([^/]+)$", "$1" );
 			}
-			final UserResource userResource = usersResource.get(userId);
-			final CredentialRepresentation passwordCred = new CredentialRepresentation();
-			passwordCred.setTemporary(false);
-			passwordCred.setType(CredentialRepresentation.PASSWORD);
-			passwordCred.setValue(userToCreate.password());
-			userResource.resetPassword(passwordCred);
+			final UserResource userResource = usersResource.get( userId );
+			final CredentialRepresentation passwordCred = new CredentialRepresentation( );
+			passwordCred.setTemporary( false );
+			passwordCred.setType( CredentialRepresentation.PASSWORD );
+			passwordCred.setValue( userToCreate.password( ) );
+			userResource.resetPassword( passwordCred );
 		}
 	}
 }
