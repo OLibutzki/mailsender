@@ -1,6 +1,7 @@
 tasks:
-- init: ./mvnw package -DskipTests
-  command: java -jar target/*.jar
+  - init: sudo echo "127.0.0.1 host.docker.internal" | sudo tee -a /etc/hosts
+  - init: ./mvnw package -DskipTests
+    command: java -jar target/*.jar
 
 # exposed ports
 ports:
