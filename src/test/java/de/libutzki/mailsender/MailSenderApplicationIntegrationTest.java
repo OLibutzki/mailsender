@@ -26,6 +26,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
@@ -36,6 +37,7 @@ import io.restassured.RestAssured;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.*;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -140,6 +142,12 @@ class MailSenderApplicationIntegrationTest {
 				page.waitForLoadState();
 				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-login.png")));
 				
+				// Assert that no mails  been added to sent mails table
+				assertThat(page.locator("#sent-mails-table tbody tr")).hasCount(0);
+				
+			     given().when().get("/messages")
+		            .then().body("total", equalTo(0));
+				
 				// Send mail
 				final String body = 
 						"""
@@ -152,6 +160,9 @@ class MailSenderApplicationIntegrationTest {
 				page.locator("id=subject").fill(mail.subject());
 				page.locator("id=body").fill(mail.body());
 				page.locator("id=send-mail-button").click();
+				
+				
+				assertThat(page.locator("#sent-mails-table tbody tr")).hasCount(1);
 				
 			     given().when().get("/messages")
 		            .then().body("total", equalTo(1));
