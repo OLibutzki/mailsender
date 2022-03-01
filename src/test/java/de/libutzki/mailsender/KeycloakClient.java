@@ -56,10 +56,10 @@ class KeycloakClient implements AutoCloseable {
 			realm.clients().create(mailsenderClient).close();
 		}
 
-		void createUser(String username, String password) {
+		void createUser(User userToCreate) {
 
 			UserRepresentation user = new UserRepresentation();
-			user.setUsername(username);
+			user.setUsername(userToCreate.username());
 			user.setEnabled(true);
 			RealmResource realm = keycloak.realm(realmName);
 			UsersResource usersResource = realm.users();
@@ -71,7 +71,7 @@ class KeycloakClient implements AutoCloseable {
 			final CredentialRepresentation passwordCred = new CredentialRepresentation();
 			passwordCred.setTemporary(false);
 			passwordCred.setType(CredentialRepresentation.PASSWORD);
-			passwordCred.setValue(password);
+			passwordCred.setValue(userToCreate.password());
 			userResource.resetPassword(passwordCred);
 		}
 	}
