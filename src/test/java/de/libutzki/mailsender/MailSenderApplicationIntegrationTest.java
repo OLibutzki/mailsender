@@ -41,6 +41,12 @@ import io.restassured.RestAssured;
 @Testcontainers
 class MailSenderApplicationIntegrationTest {
 
+	private static final String hostname = "host.docker.internal";
+
+	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
+
+	private static final User user1 = new User( "user1", "bmbm" );
+
 	@Container
 	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>( "postgres:14.1" )
 			.withUsername( "postgres" )
@@ -52,7 +58,7 @@ class MailSenderApplicationIntegrationTest {
 
 	@Container
 	static GenericContainer<?> chrome = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.51.1-chrome-stable" ) )
-			.withExtraHost( "host.docker.internal", "host-gateway" )
+			.withExtraHost( hostname, "host-gateway" )
 			.withAccessToHost( true )
 			.withExposedPorts( 3000 )
 			.waitingFor( Wait.forHttp( "/" ) );
@@ -67,12 +73,6 @@ class MailSenderApplicationIntegrationTest {
 
 	@LocalServerPort
 	private Integer port;
-
-	private static final String hostname = "host.docker.internal";
-
-	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
-
-	private static final User user1 = new User( "user1", "bmbm" );
 
 	@DynamicPropertySource
 	static void configurePostgres( final DynamicPropertyRegistry registry ) {
