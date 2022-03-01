@@ -99,7 +99,7 @@ class MailSenderApplicationIntegrationTest {
 	}
 
 	@Test
-	void login() {
+	void testApplication() {
 
 		try (Playwright playwright = Playwright.create()) {
 			Browser browser = playwright.chromium()
@@ -115,6 +115,9 @@ class MailSenderApplicationIntegrationTest {
 				page.locator("id=kc-login").click();
 				page.waitForLoadState();
 				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-login.png")));
+				page.locator("id=logout_button").click();
+				page.waitForLoadState();
+				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-logout.png")));
 			}
 		}
 	}
