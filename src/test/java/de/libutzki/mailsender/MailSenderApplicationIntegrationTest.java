@@ -25,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
@@ -92,6 +93,7 @@ class MailSenderApplicationIntegrationTest {
 			final RealmClient realm = keycloakClient.createRealm(keycloakProperties.getRealm());
 			realm.createClient(keycloakProperties.getResource(),
 					String.format("http://host.docker.internal:%s/*", port));
+			realm.createUser("user1", "bmbm");
 
 		}
 	}
@@ -101,12 +103,18 @@ class MailSenderApplicationIntegrationTest {
 
 		try (Playwright playwright = Playwright.create()) {
 			Browser browser = playwright.chromium()
-					.connect("ws://" + chrome.getHost() + ":" + chrome.getFirstMappedPort() + "/playwright");
+					.connectOverCDP("ws://" + chrome.getHost() + ":" + chrome.getFirstMappedPort() + "");
 			String baseUrl = String.format("http://host.docker.internal:%d", port);
-			try (Page page = browser.newPage()) {
+			try (BrowserContext browserContext = browser.newContext(new Browser.NewContextOptions().setRecordVideoDir(Paths.get("target/videos")));
+					Page page = browserContext.newPage()) {
 				page.navigate(baseUrl + "/");
 				page.waitForLoadState();
 				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("login-screen.png")));
+				page.locator("id=username").fill("user1");
+				page.locator("id=password").fill("bmbm");
+				page.locator("id=kc-login").click();
+				page.waitForLoadState();
+				page.screenshot(new ScreenshotOptions().setPath(screenshotPath.resolve("after-login.png")));
 			}
 		}
 	}
