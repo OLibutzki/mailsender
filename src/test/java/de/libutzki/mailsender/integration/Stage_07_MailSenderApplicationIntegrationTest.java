@@ -5,12 +5,14 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -45,8 +47,12 @@ import io.restassured.RestAssured;
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
-//@Disabled( "Disabled because it needs an installed browser." )
+@DisabledIf( "hasNoDisplay" )
 class Stage_07_MailSenderApplicationIntegrationTest {
+
+	static boolean hasNoDisplay( ) {
+		return GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ).length == 0;
+	}
 
 	private static final String hostname = "host.docker.internal";
 
