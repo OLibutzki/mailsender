@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -32,10 +33,12 @@ import com.c4_soft.springaddons.security.oauth2.test.annotations.keycloak.WithMo
 import io.restassured.RestAssured;
 
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
+@DirtiesContext
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
+		"keycloak.auth-server-url=http://dummy:9999/auth"
 } )
 class Stage_06_MailControllerWithPersistenceTest {
 

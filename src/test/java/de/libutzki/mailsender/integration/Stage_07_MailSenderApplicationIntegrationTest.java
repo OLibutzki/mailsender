@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -41,6 +42,7 @@ import de.libutzki.mailsender.integration.KeycloakClient.RealmClient;
 import io.restassured.RestAssured;
 
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
+@DirtiesContext
 @Testcontainers
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",

@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,9 +30,13 @@ import de.libutzki.mailsender.model.SentMailDTO;
 import de.libutzki.mailsender.service.MailService;
 
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
+@DirtiesContext
 @AutoConfigureMockMvc
 // Disable persistence
-@TestPropertySource( properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration" )
+@TestPropertySource( properties = {
+		"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration",
+		"keycloak.auth-server-url=http://dummy:9999/auth"
+} )
 class Stage_05_MailControllerTest {
 
 	@Autowired

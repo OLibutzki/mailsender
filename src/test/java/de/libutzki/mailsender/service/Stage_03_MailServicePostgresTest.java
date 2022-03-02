@@ -13,12 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import de.libutzki.mailsender.model.NewMail;
 import de.libutzki.mailsender.model.SentMailDTO;
 
 @SpringBootTest
+@DirtiesContext
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
