@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
@@ -44,7 +45,7 @@ import io.restassured.RestAssured;
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
-//@Disabled( "Disabled because it needs an installed browser." )
+@Disabled( "Disabled because it needs an installed browser." )
 class Stage_07_MailSenderApplicationIntegrationTest {
 
 	private static final String hostname = "host.docker.internal";
