@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
@@ -46,15 +45,15 @@ import io.restassured.RestAssured;
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
-@Disabled( "Disabled because it needs an installed browser." )
+//@Disabled( "Disabled because it needs an installed browser." )
 class Stage_07_MailSenderApplicationIntegrationTest {
 
 	private static final String hostname = "host.docker.internal";
 
 	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
 
-	private static final User user1 = new User( "user1", "password1", "example@example.com" );
-
+	private static final User user1 = new User( "user1", "password1", "user1@example.com" );
+	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 	@Container
 	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" );
 
@@ -110,6 +109,7 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
 			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
 			realm.createUser( user1 );
+			realm.createUser( user2 );
 
 		}
 	}
@@ -135,10 +135,9 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "login-screen.png" ) ) );
 
-				// Login
-				page.locator( "id=username" ).fill( user1.username( ) );
-				page.locator( "id=password" ).fill( user1.password( ) );
-				page.locator( "id=kc-login" ).click( );
+				// Login user 1
+				final LoginPage loginPage = new LoginPage( page );
+				loginPage.login( user1.username( ), user1.password( ) );
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-login.png" ) ) );
 
@@ -186,6 +185,16 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 				page.locator( "id=logout_button" ).click( );
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-logout.png" ) ) );
+
+				// Login user 2
+				loginPage.login( user2.username( ), user2.password( ) );
+
+				// Assert that no mails been added to sent mails table
+				assertThat( tableRowLocator ).hasCount( 0 );
+
+				given( )
+						.when( ).get( "/search?kind={kind}&query={sender}", "from", user2.eMail( ) )
+						.then( ).body( "total", equalTo( 0 ) );
 
 			}
 		}

@@ -53,7 +53,8 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 
 	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
 
-	private static final User user1 = new User( "user1", "password1", "example@example.com" );
+	private static final User user1 = new User( "user1", "password1", "user1@example.com" );
+	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 
 	@Container
 	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" );
@@ -118,6 +119,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
 			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
 			realm.createUser( user1 );
+			realm.createUser( user2 );
 
 		}
 	}
@@ -143,10 +145,9 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "login-screen.png" ) ) );
 
-				// Login
-				page.locator( "id=username" ).fill( user1.username( ) );
-				page.locator( "id=password" ).fill( user1.password( ) );
-				page.locator( "id=kc-login" ).click( );
+				// Login user 1
+				final LoginPage loginPage = new LoginPage( page );
+				loginPage.login( user1.username( ), user1.password( ) );
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-login.png" ) ) );
 
@@ -155,7 +156,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				assertThat( tableRowLocator ).hasCount( 0 );
 
 				given( )
-						.when( ).get( "/messages" )
+						.when( ).get( "/search?kind={kind}&query={sender}", "from", user1.eMail( ) )
 						.then( ).body( "total", equalTo( 0 ) );
 
 				// Send mail
@@ -178,7 +179,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				// Assert sent mails from Mailhog
 
 				given( )
-						.when( ).get( "/messages" )
+						.when( ).get( "/search?kind={kind}&query={sender}", "from", user1.eMail( ) )
 						.then( )
 						.body( "total", equalTo( 1 ) )
 						.and( )
@@ -195,6 +196,15 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				page.waitForLoadState( );
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-logout.png" ) ) );
 
+				// Login user 2
+				loginPage.login( user2.username( ), user2.password( ) );
+
+				// Assert that no mails been added to sent mails table
+				assertThat( tableRowLocator ).hasCount( 0 );
+
+				given( )
+						.when( ).get( "/search?kind={kind}&query={sender}", "from", user2.eMail( ) )
+						.then( ).body( "total", equalTo( 0 ) );
 			}
 		}
 	}
