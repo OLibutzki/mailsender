@@ -5,7 +5,6 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -47,12 +46,8 @@ import io.restassured.RestAssured;
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
-@DisabledIf( "hasNoDisplay" )
+@DisabledIf( "java.awt.GraphicsEnvironment#isHeadless" )
 class Stage_07_MailSenderApplicationIntegrationTest {
-
-	static boolean hasNoDisplay( ) {
-		return GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ).length == 0;
-	}
 
 	private static final String hostname = "host.docker.internal";
 
