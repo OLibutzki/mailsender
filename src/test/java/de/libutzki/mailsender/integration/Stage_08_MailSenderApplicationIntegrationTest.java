@@ -1,10 +1,9 @@
-package de.libutzki.mailsender;
+package de.libutzki.mailsender.integration;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 import java.nio.file.Path;
@@ -22,8 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -37,23 +36,21 @@ import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import de.libutzki.mailsender.KeycloakClient.RealmClient;
+import de.libutzki.mailsender.integration.KeycloakClient.RealmClient;
 import io.restassured.RestAssured;
 
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
 @Testcontainers
-class MailSenderApplicationIntegrationTest {
+@TestPropertySource( properties = {
+		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
+} )
+class Stage_08_MailSenderApplicationIntegrationTest {
 
 	private static final String hostname = "host.docker.internal";
 
 	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
 
 	private static final User user1 = new User( "user1", "password1", "example@example.com" );
-
-	@Container
-	static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>( "postgres:14.1" )
-			.withUsername( "postgres" )
-			.withPassword( "test" );
 
 	@Container
 	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" )
@@ -78,15 +75,8 @@ class MailSenderApplicationIntegrationTest {
 							.forPort( MAILHOG_HTTP_PORT ) );
 
 	@DynamicPropertySource
-	static void configurePostgres( final DynamicPropertyRegistry registry ) {
-		registry.add( "spring.datasource.url", postgresContainer::getJdbcUrl );
-		registry.add( "spring.datasource.username", postgresContainer::getUsername );
-		registry.add( "spring.datasource.password", postgresContainer::getPassword );
-	}
-
-	@DynamicPropertySource
 	static void configureKeycloak( final DynamicPropertyRegistry registry ) {
-		registry.add( "keycloak.auth-server-url", MailSenderApplicationIntegrationTest::getAuthServerURL );
+		registry.add( "keycloak.auth-server-url", Stage_08_MailSenderApplicationIntegrationTest::getAuthServerURL );
 	}
 
 	private static String getAuthServerURL( ) {
@@ -159,7 +149,7 @@ class MailSenderApplicationIntegrationTest {
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-login.png" ) ) );
 
 				// Assert that no mails been added to sent mails table
-				Locator tableRowLocator = page.locator( "#sent-mails-table tbody tr" );
+				final Locator tableRowLocator = page.locator( "#sent-mails-table tbody tr" );
 				assertThat( tableRowLocator ).hasCount( 0 );
 
 				given( )
@@ -177,8 +167,8 @@ class MailSenderApplicationIntegrationTest {
 
 				assertThat( tableRowLocator ).hasCount( 1 );
 
-				Locator firstSentMail = tableRowLocator.nth( 0 );
-				Locator rowsOfFirstSentMail = firstSentMail.locator( "td" );
+				final Locator firstSentMail = tableRowLocator.nth( 0 );
+				final Locator rowsOfFirstSentMail = firstSentMail.locator( "td" );
 				assertThat( rowsOfFirstSentMail.nth( 0 ) ).hasText( mail.recipient( ) );
 				assertThat( rowsOfFirstSentMail.nth( 1 ) ).hasText( mail.subject( ) );
 				assertThat( rowsOfFirstSentMail.nth( 2 ) ).hasText( mail.body( ) );

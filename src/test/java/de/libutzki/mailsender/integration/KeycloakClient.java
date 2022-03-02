@@ -1,4 +1,4 @@
-package de.libutzki.mailsender;
+package de.libutzki.mailsender.integration;
 
 import static java.util.Collections.singletonList;
 
