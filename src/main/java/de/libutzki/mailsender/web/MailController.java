@@ -26,7 +26,7 @@ public class MailController {
 	}
 
 	@GetMapping
-	public String index( final Model model, Principal principal  ) {
+	public String index( final Model model, final Principal principal ) {
 		addAttributes( model, getEMailAddress( principal ) );
 		return "index";
 	}
@@ -37,21 +37,21 @@ public class MailController {
 	}
 
 	@PostMapping
-	public String sendMail( @Valid @ModelAttribute( "mail" ) final NewMail mail, final Model model, Principal principal ) {
-		String senderEMailAddress = getEMailAddress( principal );
+	public String sendMail( @Valid @ModelAttribute( "mail" ) final NewMail mail, final Model model, final Principal principal ) {
+		final String senderEMailAddress = getEMailAddress( principal );
 		mailService.sendMail( senderEMailAddress, mail );
 
 		addAttributes( model, senderEMailAddress );
 		return "redirect:/";
 	}
 
-	private void addAttributes( final Model model, String senderEMailAddress ) {
+	private void addAttributes( final Model model, final String senderEMailAddress ) {
 		model.addAttribute( "sentMails", mailService.getSentMailsForSender( senderEMailAddress ) );
 	}
-	
-	private String getEMailAddress(Principal principal) {
-		KeycloakAuthenticationToken authToken = (KeycloakAuthenticationToken) principal;
-		String email = authToken.getAccount( ).getKeycloakSecurityContext( ).getToken( ).getEmail( );
+
+	private String getEMailAddress( final Principal principal ) {
+		final KeycloakAuthenticationToken authToken = ( KeycloakAuthenticationToken ) principal;
+		final String email = authToken.getAccount( ).getKeycloakSecurityContext( ).getToken( ).getEmail( );
 		return email;
 	}
 

@@ -4,7 +4,6 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,8 +56,7 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 	private static final User user1 = new User( "user1", "password1", "example@example.com" );
 
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" )
-			.withAccessToHost( true );
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" );
 
 	private static final Integer MAILHOG_SMTP_PORT = 1025;
 	private static final Integer MAILHOG_HTTP_PORT = 8025;
@@ -95,7 +93,6 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 
 	@BeforeEach
 	void init( @Autowired final KeycloakSpringBootProperties keycloakProperties ) {
-		exposeHostPorts( port );
 		try ( KeycloakClient keycloakClient = new KeycloakClient(
 				KeycloakBuilder
 						.builder( )

@@ -53,7 +53,7 @@ class Stage_05_MailControllerTest {
 				singletonList(
 						new SentMailDTO( "recipient@example.com", "Test-Subject", "Test-Body" ) ) );
 
-		this.mockMvc.perform( get( "/" ) )
+		mockMvc.perform( get( "/" ) )
 				.andExpect( status( ).isOk( ) )
 				.andExpect( content( ).string( containsString( "recipient@example.com" ) ) )
 				.andExpect( content( ).string( containsString( "Test-Subject" ) ) )
@@ -67,7 +67,7 @@ class Stage_05_MailControllerTest {
 				singletonList(
 						new SentMailDTO( "recipient@example.com", "Test-Subject", "Test-Body" ) ) );
 
-		this.mockMvc.perform( get( "/" ) )
+		mockMvc.perform( get( "/" ) )
 				.andExpect( status( ).is3xxRedirection( ) );
 	}
 
@@ -75,7 +75,7 @@ class Stage_05_MailControllerTest {
 	@WithMockKeycloakAuth( claims = @OpenIdClaims( email = "sender@example.com" ) )
 	public void testSendMail( ) throws Exception {
 
-		this.mockMvc.perform( post( "/" )
+		mockMvc.perform( post( "/" )
 				.contentType( MediaType.APPLICATION_FORM_URLENCODED )
 				.with( csrf( ) )
 				.param( "recipient", "recipient@example.com" )

@@ -73,14 +73,14 @@ class Stage_06_MailControllerWithPersistenceTest {
 	@WithMockKeycloakAuth( claims = @OpenIdClaims( email = "sender@example.com" ) )
 	public void testWithAuth( ) throws Exception {
 
-		this.mockMvc.perform( get( "/" ) )
+		mockMvc.perform( get( "/" ) )
 				.andExpect( status( ).isOk( ) );
 	}
 
 	@Test
 	public void testWithoutAuth( ) throws Exception {
 
-		this.mockMvc.perform( get( "/" ) )
+		mockMvc.perform( get( "/" ) )
 				.andExpect( status( ).is3xxRedirection( ) );
 	}
 
@@ -92,7 +92,7 @@ class Stage_06_MailControllerWithPersistenceTest {
 				.when( ).get( "/messages" )
 				.then( ).body( "total", equalTo( 0 ) );
 
-		this.mockMvc.perform( post( "/" )
+		mockMvc.perform( post( "/" )
 				.contentType( MediaType.APPLICATION_FORM_URLENCODED )
 				.with( csrf( ) )
 				.param( "recipient", "recipient@example.com" )
@@ -114,7 +114,7 @@ class Stage_06_MailControllerWithPersistenceTest {
 				.and( )
 				.body( "items[0].Content.Body", equalTo( "Test-Body" ) );
 
-		this.mockMvc.perform( get( "/" ) )
+		mockMvc.perform( get( "/" ) )
 				.andExpect( status( ).isOk( ) )
 				.andExpect( content( ).string( containsString( "recipient@example.com" ) ) )
 				.andExpect( content( ).string( containsString( "Test-Subject" ) ) )
