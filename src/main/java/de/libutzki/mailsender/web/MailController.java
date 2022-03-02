@@ -1,7 +1,10 @@
 package de.libutzki.mailsender.web;
 
+import java.security.Principal;
+
 import javax.validation.Valid;
 
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +19,6 @@ import de.libutzki.mailsender.service.MailService;
 @RequestMapping( "/" )
 public class MailController {
 
-	private static final String SENDER = "oliver@libutzki.de";
-
 	private final MailService mailService;
 
 	public MailController( final MailService mailService ) {
@@ -25,8 +26,8 @@ public class MailController {
 	}
 
 	@GetMapping
-	public String index( final Model model ) {
-		addAttributes( model );
+	public String index( final Model model, Principal principal  ) {
+		addAttributes( model, getEMailAddress( principal ) );
 		return "index";
 	}
 
@@ -36,15 +37,22 @@ public class MailController {
 	}
 
 	@PostMapping
-	public String sendMail( @Valid @ModelAttribute( "mail" ) final NewMail mail, final Model model ) {
-		mailService.sendMail( SENDER, mail );
+	public String sendMail( @Valid @ModelAttribute( "mail" ) final NewMail mail, final Model model, Principal principal ) {
+		String senderEMailAddress = getEMailAddress( principal );
+		mailService.sendMail( senderEMailAddress, mail );
 
-		addAttributes( model );
+		addAttributes( model, senderEMailAddress );
 		return "redirect:/";
 	}
 
-	private void addAttributes( final Model model ) {
-		model.addAttribute( "sentMails", mailService.getSentMailsForSender( SENDER ) );
+	private void addAttributes( final Model model, String senderEMailAddress ) {
+		model.addAttribute( "sentMails", mailService.getSentMailsForSender( senderEMailAddress ) );
+	}
+	
+	private String getEMailAddress(Principal principal) {
+		KeycloakAuthenticationToken authToken = (KeycloakAuthenticationToken) principal;
+		String email = authToken.getAccount( ).getKeycloakSecurityContext( ).getToken( ).getEmail( );
+		return email;
 	}
 
 }

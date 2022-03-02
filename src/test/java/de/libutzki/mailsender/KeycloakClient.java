@@ -59,8 +59,10 @@ class KeycloakClient implements AutoCloseable {
 		void createUser( final User userToCreate ) {
 
 			final UserRepresentation user = new UserRepresentation( );
-			user.setUsername( userToCreate.username( ) );
 			user.setEnabled( true );
+			user.setUsername( userToCreate.username( ) );
+			user.setEmail( userToCreate.eMail( ) );
+			user.setEmailVerified( true );
 			final RealmResource realm = keycloak.realm( realmName );
 			final UsersResource usersResource = realm.users( );
 			final String userId;

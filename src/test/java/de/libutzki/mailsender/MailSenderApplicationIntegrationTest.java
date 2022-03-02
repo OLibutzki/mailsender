@@ -2,7 +2,9 @@ package de.libutzki.mailsender;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.contains;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 import java.nio.file.Path;
@@ -29,6 +31,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Page.ScreenshotOptions;
 import com.microsoft.playwright.Playwright;
@@ -45,10 +48,10 @@ class MailSenderApplicationIntegrationTest {
 
 	private static final Path screenshotAndVideoPath = Paths.get( "target", "playwright" );
 
-	private static final User user1 = new User( "user1", "bmbm" );
+	private static final User user1 = new User( "user1", "password1", "example@example.com" );
 
 	@Container
-	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>( "postgres:14.1" )
+	static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>( "postgres:14.1" )
 			.withUsername( "postgres" )
 			.withPassword( "test" );
 
@@ -57,7 +60,7 @@ class MailSenderApplicationIntegrationTest {
 			.withAccessToHost( true );
 
 	@Container
-	static GenericContainer<?> chrome = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.51.1-chrome-stable" ) )
+	static GenericContainer<?> chromeContainer = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.51.1-chrome-stable" ) )
 			.withExtraHost( hostname, "host-gateway" )
 			.withAccessToHost( true )
 			.withExposedPorts( 3000 )
@@ -69,27 +72,21 @@ class MailSenderApplicationIntegrationTest {
 	@Container
 	static GenericContainer<?> mailhogContainer = new GenericContainer<>( "mailhog/mailhog:v1.0.1" )
 			.withExposedPorts( MAILHOG_SMTP_PORT, MAILHOG_HTTP_PORT )
-			.waitingFor( Wait.forHttp( "/" ).forPort( MAILHOG_HTTP_PORT ) );
-
-	@LocalServerPort
-	private Integer port;
+			.waitingFor(
+					Wait
+							.forHttp( "/" )
+							.forPort( MAILHOG_HTTP_PORT ) );
 
 	@DynamicPropertySource
 	static void configurePostgres( final DynamicPropertyRegistry registry ) {
-		registry.add( "spring.datasource.url", postgres::getJdbcUrl );
-		registry.add( "spring.datasource.username", postgres::getUsername );
-		registry.add( "spring.datasource.password", postgres::getPassword );
+		registry.add( "spring.datasource.url", postgresContainer::getJdbcUrl );
+		registry.add( "spring.datasource.username", postgresContainer::getUsername );
+		registry.add( "spring.datasource.password", postgresContainer::getPassword );
 	}
 
 	@DynamicPropertySource
 	static void configureKeycloak( final DynamicPropertyRegistry registry ) {
 		registry.add( "keycloak.auth-server-url", MailSenderApplicationIntegrationTest::getAuthServerURL );
-	}
-
-	@DynamicPropertySource
-	static void configureMail( final DynamicPropertyRegistry registry ) {
-		registry.add( "spring.mail.host", mailhogContainer::getHost );
-		registry.add( "spring.mail.properties.mail.smtp.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
 	}
 
 	private static String getAuthServerURL( ) {
@@ -99,6 +96,15 @@ class MailSenderApplicationIntegrationTest {
 				keycloakContainer.getHttpPort( ),
 				keycloakContainer.getContextPath( ) );
 	}
+
+	@DynamicPropertySource
+	static void configureMail( final DynamicPropertyRegistry registry ) {
+		registry.add( "spring.mail.host", mailhogContainer::getHost );
+		registry.add( "spring.mail.properties.mail.smtp.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
+	}
+
+	@LocalServerPort
+	private Integer port;
 
 	@BeforeEach
 	void init( @Autowired final KeycloakSpringBootProperties keycloakProperties ) {
@@ -126,7 +132,7 @@ class MailSenderApplicationIntegrationTest {
 
 	@BeforeEach
 	void setupRestAssured( ) {
-		RestAssured.baseURI = "http://" + mailhogContainer.getHost( );
+		RestAssured.baseURI = String.format( "http://%s", mailhogContainer.getHost( ) );
 		RestAssured.port = mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT );
 		RestAssured.basePath = "/api/v2";
 	}
@@ -136,7 +142,7 @@ class MailSenderApplicationIntegrationTest {
 
 		try ( Playwright playwright = Playwright.create( ) ) {
 			final Browser browser = playwright.chromium( )
-					.connectOverCDP( "ws://" + chrome.getHost( ) + ":" + chrome.getFirstMappedPort( ) + "" );
+					.connectOverCDP( "ws://" + chromeContainer.getHost( ) + ":" + chromeContainer.getFirstMappedPort( ) );
 			final String baseUrl = String.format( "http://%s:%s", hostname, port );
 			try (
 					BrowserContext browserContext = browser.newContext( new Browser.NewContextOptions( ).setRecordVideoDir( screenshotAndVideoPath ) );
@@ -153,29 +159,44 @@ class MailSenderApplicationIntegrationTest {
 				page.screenshot( new ScreenshotOptions( ).setPath( screenshotAndVideoPath.resolve( "after-login.png" ) ) );
 
 				// Assert that no mails been added to sent mails table
-				assertThat( page.locator( "#sent-mails-table tbody tr" ) ).hasCount( 0 );
+				Locator tableRowLocator = page.locator( "#sent-mails-table tbody tr" );
+				assertThat( tableRowLocator ).hasCount( 0 );
 
 				given( )
 						.when( ).get( "/messages" )
 						.then( ).body( "total", equalTo( 0 ) );
 
 				// Send mail
-				final String body = """
-						This a a Test-Mail.
-						It has been sent by an integration test.
-						""";
-
-				final Mail mail = new Mail( "test@example.com", "Test-Mail", body );
-				page.locator( "id=recipient" ).fill( mail.recepient( ) );
+				final Mail mail = new Mail( "test@example.com", "Test-Mail", "This is a test mail" );
+				page.locator( "id=recipient" ).fill( mail.recipient( ) );
 				page.locator( "id=subject" ).fill( mail.subject( ) );
 				page.locator( "id=body" ).fill( mail.body( ) );
 				page.locator( "id=send-mail-button" ).click( );
 
-				assertThat( page.locator( "#sent-mails-table tbody tr" ) ).hasCount( 1 );
+				// Assert sent mails table content
+
+				assertThat( tableRowLocator ).hasCount( 1 );
+
+				Locator firstSentMail = tableRowLocator.nth( 0 );
+				Locator rowsOfFirstSentMail = firstSentMail.locator( "td" );
+				assertThat( rowsOfFirstSentMail.nth( 0 ) ).hasText( mail.recipient( ) );
+				assertThat( rowsOfFirstSentMail.nth( 1 ) ).hasText( mail.subject( ) );
+				assertThat( rowsOfFirstSentMail.nth( 2 ) ).hasText( mail.body( ) );
+
+				// Assert sent mails from Mailhog
 
 				given( )
 						.when( ).get( "/messages" )
-						.then( ).body( "total", equalTo( 1 ) );
+						.then( )
+						.body( "total", equalTo( 1 ) )
+						.and( )
+						.body( "items[0].Content.Headers.From", contains( user1.eMail( ) ) )
+						.and( )
+						.body( "items[0].Content.Headers.To", contains( mail.recipient( ) ) )
+						.and( )
+						.body( "items[0].Content.Headers.Subject", contains( mail.subject( ) ) )
+						.and( )
+						.body( "items[0].Content.Body", equalTo( mail.body( ) ) );
 
 				// Logout
 				page.locator( "id=logout_button" ).click( );

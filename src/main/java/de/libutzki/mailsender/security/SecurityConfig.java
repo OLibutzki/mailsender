@@ -38,7 +38,15 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Override
 	protected void configure( final HttpSecurity http ) throws Exception {
 		super.configure( http );
-		http.authorizeRequests( ).anyRequest( ).authenticated( ).and( ).logout( ).addLogoutHandler( keycloakLogoutHandler( ) )
-				.logoutUrl( "/sso/logout" ).permitAll( ).logoutSuccessUrl( "/logout-successful" );
+		http.authorizeRequests( )
+				.anyRequest( ).authenticated( )
+
+				.and( )
+
+				.logout( )
+				.addLogoutHandler( keycloakLogoutHandler( ) )
+				.logoutUrl( "/sso/logout" )
+				.permitAll( )
+				.logoutSuccessUrl( "/logout-successful" );
 	}
 }

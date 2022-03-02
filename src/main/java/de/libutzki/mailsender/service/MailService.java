@@ -24,16 +24,16 @@ public class MailService {
 	}
 
 	@Transactional( rollbackFor = Exception.class )
-	public void sendMail( final String sender, final NewMail newMail ) {
+	public void sendMail( final String senderEMailAddress, final NewMail newMail ) {
 		final SimpleMailMessage message = new SimpleMailMessage( );
-		message.setFrom( sender );
+		message.setFrom( senderEMailAddress );
 		message.setTo( newMail.recipient( ) );
 		message.setSubject( newMail.subject( ) );
 		message.setText( newMail.body( ) );
 		mailSender.send( message );
 
 		final SentMail sentMail = new SentMail( );
-		sentMail.setSender( sender );
+		sentMail.setSender( senderEMailAddress );
 		sentMail.setRecipient( newMail.recipient( ) );
 		sentMail.setSubject( newMail.subject( ) );
 		sentMail.setBody( newMail.body( ) );
