@@ -47,7 +47,7 @@ import io.restassured.RestAssured;
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
 } )
 @DisabledIf( "java.awt.GraphicsEnvironment#isHeadless" )
-class Stage_07_MailSenderApplicationIntegrationTest {
+class Stage_07_MailSenderApplicationLocalBrowserIntegrationTest {
 
 	private static final String hostname = "host.docker.internal";
 
@@ -71,7 +71,7 @@ class Stage_07_MailSenderApplicationIntegrationTest {
 
 	@DynamicPropertySource
 	static void configureKeycloak( final DynamicPropertyRegistry registry ) {
-		registry.add( "keycloak.auth-server-url", Stage_07_MailSenderApplicationIntegrationTest::getAuthServerURL );
+		registry.add( "keycloak.auth-server-url", Stage_07_MailSenderApplicationLocalBrowserIntegrationTest::getAuthServerURL );
 	}
 
 	private static String getAuthServerURL( ) {

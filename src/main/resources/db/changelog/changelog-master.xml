@@ -10,7 +10,7 @@
 		<createSequence sequenceName="hibernate_sequence" incrementBy="1" />
 	</changeSet>
 
-	<changeSet id="2" author="oliver.libutzki">
+	<changeSet id="2" author="oliver.libutzki" dbms="!oracle">
 		<createTable tableName="sent_mail">
 			<column name="id" type="int8">
 				<constraints primaryKey="true" />
@@ -23,6 +23,22 @@
 			</column>
 			<column name="subject" type="TEXT" />
 			<column name="body" type="TEXT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="2" author="oliver.libutzki" dbms="oracle">
+		<createTable tableName="sent_mail">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="sender" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="recipient" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="subject" type="varchar(255)" />
+			<column name="body" type="varchar(255)" />
 		</createTable>
 	</changeSet>
 
