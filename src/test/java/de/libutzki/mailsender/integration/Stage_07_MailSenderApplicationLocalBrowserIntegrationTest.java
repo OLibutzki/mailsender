@@ -85,7 +85,7 @@ class Stage_07_MailSenderApplicationLocalBrowserIntegrationTest {
 	@DynamicPropertySource
 	static void configureMail( final DynamicPropertyRegistry registry ) {
 		registry.add( "spring.mail.host", mailhogContainer::getHost );
-		registry.add( "spring.mail.properties.mail.smtp.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
+		registry.add( "spring.mail.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
 	}
 
 	@LocalServerPort

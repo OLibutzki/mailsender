@@ -1,0 +1,49 @@
+version: '3.7'
+services:      
+
+  postgres:
+    image: postgres:14.1
+    container_name: mailsender-local-dev-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "15432:5432"
+    deploy:
+        resources:
+            limits:
+                memory: 250M
+            reservations:
+                memory: 250M
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:17.0.0
+    container_name: mailsender-local-dev-keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command:
+      - start-dev
+    ports:
+      - "18080:8080"
+    deploy:
+        resources:
+            limits:
+                memory: 512M
+            reservations:
+                memory: 512M
+
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailsender-local-dev-mailhog
+    ports:
+      - "11025:1025"
+      - "18025:8025"
+    deploy:
+        resources:
+            limits:
+                memory: 16M
+            reservations:
+                memory: 16M

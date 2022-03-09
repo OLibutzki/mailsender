@@ -11,8 +11,12 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource( value = "classpath:/application.dev.properties", ignoreResourceNotFound = true )
 public class MailSenderApplication {
 
-	public static void main( final String[] args ) {
-		SpringApplication.run( MailSenderApplication.class, args );
+	public static void main( String[] args ) {
+		createSpringApplication( ).run( args );
+	}
+
+	public static SpringApplication createSpringApplication( ) {
+		return new SpringApplication( MailSenderApplication.class );
 	}
 
 	@Bean

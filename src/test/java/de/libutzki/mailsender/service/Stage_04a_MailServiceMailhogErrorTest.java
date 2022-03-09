@@ -63,7 +63,7 @@ public class Stage_04a_MailServiceMailhogErrorTest {
 		proxy = toxiproxyContainer.getProxy( mailhogContainer, MAILHOG_SMTP_PORT );
 		proxy.setConnectionCut( true );
 		registry.add( "spring.mail.host", proxy::getContainerIpAddress );
-		registry.add( "spring.mail.properties.mail.smtp.port", proxy::getProxyPort );
+		registry.add( "spring.mail.port", proxy::getProxyPort );
 	}
 
 	@BeforeEach
