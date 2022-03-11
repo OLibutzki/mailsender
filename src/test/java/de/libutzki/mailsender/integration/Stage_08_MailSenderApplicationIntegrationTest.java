@@ -38,14 +38,15 @@ import com.microsoft.playwright.Playwright;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.libutzki.mailsender.integration.KeycloakClient.RealmClient;
-import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
 @DirtiesContext
 
 @Testcontainers
 @TestPropertySource( properties = {
-		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
+		"spring.datasource.url=jdbc:tc:postgresql:14.1:///Stage_08_MailSenderApplicationIntegrationTest",
 } )
 class Stage_08_MailSenderApplicationIntegrationTest {
 
@@ -124,11 +125,16 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 		}
 	}
 
+	private RequestSpecification mailhogRequestSpec;
+
 	@BeforeEach
 	void setupRestAssured( ) {
-		RestAssured.baseURI = String.format( "http://%s", mailhogContainer.getHost( ) );
-		RestAssured.port = mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT );
-		RestAssured.basePath = "/api/v2";
+
+		mailhogRequestSpec = new RequestSpecBuilder( )
+				.setBaseUri( String.format( "http://%s", mailhogContainer.getHost( ) ) )
+				.setPort( mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT ) )
+				.setBasePath( "/api/v2" )
+				.build( );
 	}
 
 	@Test
@@ -155,7 +161,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				final Locator tableRowLocator = page.locator( "#sent-mails-table tbody tr" );
 				assertThat( tableRowLocator ).hasCount( 0 );
 
-				given( )
+				given( mailhogRequestSpec )
 						.when( ).get( "/search?kind={kind}&query={sender}", "from", user1.eMail( ) )
 						.then( ).body( "total", equalTo( 0 ) );
 
@@ -178,7 +184,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 
 				// Assert sent mails from Mailhog
 
-				given( )
+				given( mailhogRequestSpec )
 						.when( ).get( "/search?kind={kind}&query={sender}", "from", user1.eMail( ) )
 						.then( )
 						.body( "total", equalTo( 1 ) )
@@ -202,7 +208,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 				// Assert that no mails been added to sent mails table
 				assertThat( tableRowLocator ).hasCount( 0 );
 
-				given( )
+				given( mailhogRequestSpec )
 						.when( ).get( "/search?kind={kind}&query={sender}", "from", user2.eMail( ) )
 						.then( ).body( "total", equalTo( 0 ) );
 			}

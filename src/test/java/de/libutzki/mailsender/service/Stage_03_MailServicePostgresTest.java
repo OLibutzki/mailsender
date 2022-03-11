@@ -22,7 +22,7 @@ import de.libutzki.mailsender.model.SentMailDTO;
 @SpringBootTest
 @DirtiesContext
 @TestPropertySource( properties = {
-		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
+		"spring.datasource.url=jdbc:tc:postgresql:14.1:///Stage_03_MailServicePostgresTest",
 } )
 public class Stage_03_MailServicePostgresTest {
 

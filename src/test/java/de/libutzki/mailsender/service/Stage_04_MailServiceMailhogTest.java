@@ -23,13 +23,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import de.libutzki.mailsender.model.NewMail;
 import de.libutzki.mailsender.model.SentMailDTO;
-import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 
 @SpringBootTest
 @Testcontainers
 @DirtiesContext
 @TestPropertySource( properties = {
-		"spring.datasource.url=jdbc:tc:postgresql:14.1:///testdb",
+		"spring.datasource.url=jdbc:tc:postgresql:14.1:///Stage_04_MailServiceMailhogTest",
 } )
 public class Stage_04_MailServiceMailhogTest {
 
@@ -53,17 +54,22 @@ public class Stage_04_MailServiceMailhogTest {
 		registry.add( "spring.mail.port", ( ) -> mailhogContainer.getMappedPort( MAILHOG_SMTP_PORT ) );
 	}
 
+	private RequestSpecification mailhogRequestSpec;
+
 	@BeforeEach
 	void setupRestAssured( ) {
-		RestAssured.baseURI = String.format( "http://%s", mailhogContainer.getHost( ) );
-		RestAssured.port = mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT );
-		RestAssured.basePath = "/api/v2";
+
+		System.out.println( getClass( ).getName( ) + ": " + String.format( "http://%s", mailhogContainer.getHost( ) ) + "; " + mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT ) );
+		mailhogRequestSpec = new RequestSpecBuilder( )
+				.setBaseUri( String.format( "http://%s", mailhogContainer.getHost( ) ) )
+				.setPort( mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT ) )
+				.setBasePath( "/api/v2" )
+				.build( );
 	}
 
 	@Test
 	void test( ) {
-
-		given( )
+		given( mailhogRequestSpec )
 				.when( ).get( "/messages" )
 				.then( ).body( "total", equalTo( 0 ) );
 
@@ -71,7 +77,7 @@ public class Stage_04_MailServiceMailhogTest {
 
 		mailService.sendMail( "sender@example.com", newMail );
 
-		given( )
+		given( mailhogRequestSpec )
 				.when( ).get( "/messages" )
 				.then( )
 				.body( "total", equalTo( 1 ) )
