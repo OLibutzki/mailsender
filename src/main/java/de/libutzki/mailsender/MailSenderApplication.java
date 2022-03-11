@@ -6,9 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 @SpringBootApplication
-@PropertySource( value = "classpath:/application.dev.properties", ignoreResourceNotFound = true )
+@PropertySources( {
+		@PropertySource( value = "classpath:/app.properties" ),
+		@PropertySource( value = "classpath:/app.dev.properties", ignoreResourceNotFound = true ),
+
+} )
 public class MailSenderApplication {
 
 	public static void main( String[] args ) {
