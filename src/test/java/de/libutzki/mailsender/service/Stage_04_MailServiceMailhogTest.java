@@ -59,7 +59,6 @@ public class Stage_04_MailServiceMailhogTest {
 	@BeforeEach
 	void setupRestAssured( ) {
 
-		System.out.println( getClass( ).getName( ) + ": " + String.format( "http://%s", mailhogContainer.getHost( ) ) + "; " + mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT ) );
 		mailhogRequestSpec = new RequestSpecBuilder( )
 				.setBaseUri( String.format( "http://%s", mailhogContainer.getHost( ) ) )
 				.setPort( mailhogContainer.getMappedPort( MAILHOG_HTTP_PORT ) )
