@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
@@ -41,6 +42,8 @@ import de.libutzki.mailsender.integration.KeycloakClient.RealmClient;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 
+@Tag( "Testcontainers" )
+@Tag( "UI-Test" )
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
 @DirtiesContext
 

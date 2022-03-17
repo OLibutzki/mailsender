@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,7 @@ import de.libutzki.mailsender.model.NewMail;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 
+@Tag( "Testcontainers" )
 @SpringBootTest
 @Testcontainers
 @DirtiesContext
