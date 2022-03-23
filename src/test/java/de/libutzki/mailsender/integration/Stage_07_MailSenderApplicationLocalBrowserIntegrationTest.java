@@ -44,6 +44,7 @@ import io.restassured.specification.RequestSpecification;
 
 @Tag( "Testcontainers" )
 @Tag( "UI-Test" )
+@Tag( "Local-Browser" )
 @SpringBootTest( webEnvironment = WebEnvironment.RANDOM_PORT )
 @DirtiesContext
 @Testcontainers
