@@ -64,7 +64,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:17.0.0" );
 
 	@Container
-	static GenericContainer<?> chromeContainer = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.51.1-chrome-stable" ) )
+	static GenericContainer<?> chromeContainer = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.53.0-chrome-stable" ) )
 			.withExtraHost( hostname, "host-gateway" )
 			.withAccessToHost( true )
 			.withExposedPorts( 3000 )
