@@ -26,4 +26,5 @@ jobs:
       run: mvn -B -e verify --file pom.xml
     - uses: actions/upload-artifact@v3
       with:
+        name: recordings
         path: '**/*.webm'
