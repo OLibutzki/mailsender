@@ -6,5 +6,5 @@ tasks:
 
 vscode:
   extensions:
-    - pivotal.vscode-spring-boot
     - vscjava.vscode-java-pack
+    - pivotal.vscode-boot-dev-pack
