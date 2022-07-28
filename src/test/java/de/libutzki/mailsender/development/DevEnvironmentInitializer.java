@@ -33,7 +33,7 @@ class DevEnvironmentInitializer implements ApplicationContextInitializer<Configu
 							.forPort( MAILHOG_HTTP_PORT ) );
 
 	private static String getJdbcUrl( ) {
-		return "jdbc:postgresql://" + postgresContainer.getContainerIpAddress( ) + ":" + postgresContainer.getMappedPort( PostgreSQLContainer.POSTGRESQL_PORT )
+		return "jdbc:postgresql://" + postgresContainer.getHost() + ":" + postgresContainer.getMappedPort( PostgreSQLContainer.POSTGRESQL_PORT )
 				+ "/" + postgresContainer.getDatabaseName( );
 	}
 
