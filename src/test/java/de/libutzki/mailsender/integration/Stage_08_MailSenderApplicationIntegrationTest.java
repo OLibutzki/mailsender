@@ -61,7 +61,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.0" );
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.1" );
 
 	@Container
 	static GenericContainer<?> chromeContainer = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.53.0-chrome-stable" ) )
