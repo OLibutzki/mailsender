@@ -18,7 +18,7 @@ services:
                 memory: 250M
 
   keycloak:
-    image: quay.io/keycloak/keycloak:19.0.1
+    image: quay.io/keycloak/keycloak:19.0.2
     container_name: mailsender-local-dev-keycloak
     environment:
       - KEYCLOAK_ADMIN=admin

@@ -61,7 +61,7 @@ class Stage_07_MailSenderApplicationLocalBrowserIntegrationTest {
 	private static final User user1 = new User( "user1", "password1", "user1@example.com" );
 	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.1" );
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.2" );
 
 	private static final Integer MAILHOG_SMTP_PORT = 1025;
 	private static final Integer MAILHOG_HTTP_PORT = 8025;
