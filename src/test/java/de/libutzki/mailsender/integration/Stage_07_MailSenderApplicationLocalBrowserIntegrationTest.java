@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.equalTo;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ class Stage_07_MailSenderApplicationLocalBrowserIntegrationTest {
 	private static final User user1 = new User( "user1", "password1", "user1@example.com" );
 	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.3" );
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:20.0.1" );
 
 	private static final Integer MAILHOG_SMTP_PORT = 1025;
 	private static final Integer MAILHOG_HTTP_PORT = 8025;
@@ -107,10 +106,6 @@ class Stage_07_MailSenderApplicationLocalBrowserIntegrationTest {
 						.clientId( KeycloakContainer.ADMIN_CLI_CLIENT )
 						.username( keycloakContainer.getAdminUsername( ) )
 						.password( keycloakContainer.getAdminPassword( ) )
-						.resteasyClient(
-								new ResteasyClientBuilder( )
-										.connectionPoolSize( 10 )
-										.build( ) )
 						.build( ) ) ) {
 			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
 			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
