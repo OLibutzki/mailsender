@@ -9,7 +9,6 @@ import static org.testcontainers.Testcontainers.exposeHostPorts;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 	private static final User user2 = new User( "user2", "password2", "user2@example.com" );
 
 	@Container
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:19.0.3" );
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:20.0.1" );
 
 	@Container
 	static GenericContainer<?> chromeContainer = new GenericContainer<>( DockerImageName.parse( "browserless/chrome:1.54.0-chrome-stable" ) )
@@ -115,10 +114,6 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 						.clientId( KeycloakContainer.ADMIN_CLI_CLIENT )
 						.username( keycloakContainer.getAdminUsername( ) )
 						.password( keycloakContainer.getAdminPassword( ) )
-						.resteasyClient(
-								new ResteasyClientBuilder( )
-										.connectionPoolSize( 10 )
-										.build( ) )
 						.build( ) ) ) {
 			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
 			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
