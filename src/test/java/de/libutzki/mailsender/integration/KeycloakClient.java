@@ -45,13 +45,14 @@ class KeycloakClient implements AutoCloseable {
 
 		private final String realmName;
 
-		void createClient( final String clientName, final String redirectURI ) {
+		void createClient( final String clientName, final String redirectURI, String clientSecret ) {
 			final ClientRepresentation mailsenderClient = new ClientRepresentation( );
 			mailsenderClient.setId( clientName );
 			mailsenderClient.setClientId( clientName );
 			mailsenderClient.setName( clientName );
 			mailsenderClient.setRedirectUris( singletonList( redirectURI ) );
-			mailsenderClient.setPublicClient( Boolean.TRUE );
+			mailsenderClient.setPublicClient( Boolean.FALSE );
+			mailsenderClient.setSecret(clientSecret);
 			final RealmResource realm = keycloak.realm( realmName );
 			realm.clients( ).create( mailsenderClient ).close( );
 		}

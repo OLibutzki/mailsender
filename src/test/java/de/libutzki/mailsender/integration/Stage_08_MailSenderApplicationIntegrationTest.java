@@ -49,6 +49,7 @@ import io.restassured.specification.RequestSpecification;
 @Testcontainers
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:tc:postgresql:14.1:///Stage_08_MailSenderApplicationIntegrationTest",
+		"keycloak.credentials.secret=testsecret"
 } )
 class Stage_08_MailSenderApplicationIntegrationTest {
 
@@ -116,7 +117,7 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 						.password( keycloakContainer.getAdminPassword( ) )
 						.build( ) ) ) {
 			final RealmClient realm = keycloakClient.createRealm( keycloakProperties.getRealm( ) );
-			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ) );
+			realm.createClient( keycloakProperties.getResource( ), String.format( "http://%s:%s/*", hostname, port ), "testsecret" );
 			realm.createUser( user1 );
 			realm.createUser( user2 );
 

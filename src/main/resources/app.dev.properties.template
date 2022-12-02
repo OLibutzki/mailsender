@@ -1,0 +1,7 @@
+spring.datasource.url=jdbc:postgresql://localhost:15432/mailsender
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+
+keycloak.auth-server-url=http://localhost:18080
+keycloak.credentials.secret=6Rmtg946okLncUz9E9PkGlk0nmHxNdm9
+
