@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
@@ -17,8 +18,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
 	 */
 	@Autowired
-	public void configureGlobal( final AuthenticationManagerBuilder auth ) throws Exception {
-		auth.authenticationProvider( keycloakAuthenticationProvider( ) );
+	public void configureGlobal(final AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 
 	/**
@@ -26,27 +27,31 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	 */
 	@Bean
 	@Override
-	protected SessionAuthenticationStrategy sessionAuthenticationStrategy( ) {
-		return new RegisterSessionAuthenticationStrategy( buildSessionRegistry( ) );
+	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+		return new RegisterSessionAuthenticationStrategy(buildSessionRegistry());
 	}
 
 	@Bean
-	protected SessionRegistry buildSessionRegistry( ) {
-		return new SessionRegistryImpl( );
+	protected SessionRegistry buildSessionRegistry() {
+		return new SessionRegistryImpl();
 	}
 
 	@Override
-	protected void configure( final HttpSecurity http ) throws Exception {
-		super.configure( http );
-		http.authorizeRequests( )
-				.anyRequest( ).authenticated( )
-
-				.and( )
-
-				.logout( )
-				.addLogoutHandler( keycloakLogoutHandler( ) )
-				.logoutUrl( "/sso/logout" )
-				.permitAll( )
-				.logoutSuccessUrl( "/logout-successful" );
+	protected void configure(final HttpSecurity http) throws Exception {
+		super.configure(http);
+		http
+			.csrf()
+			// Without setting this, the Keycloak token store cannot be cookie, see https://github.com/keycloak/keycloak/issues/15828
+			.sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy())
+			.and()
+			.authorizeRequests()
+			.anyRequest()
+			.authenticated()
+			.and()
+			.logout()
+			.addLogoutHandler(keycloakLogoutHandler())
+			.logoutUrl("/sso/logout")
+			.permitAll()
+			.logoutSuccessUrl("/logout-successful");
 	}
 }
