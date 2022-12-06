@@ -9,6 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
@@ -24,8 +27,7 @@ import de.libutzki.mailsender.model.SentMailDTO;
 @TestPropertySource( properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.jpa.hibernate.ddl-auto=create-drop",
-		"spring.liquibase.enabled=false"
-
+		"spring.liquibase.enabled=false",
 } )
 public class Stage_02_MailServiceH2Test {
 

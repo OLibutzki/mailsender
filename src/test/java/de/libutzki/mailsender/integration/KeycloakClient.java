@@ -2,8 +2,6 @@ package de.libutzki.mailsender.integration;
 
 import static java.util.Collections.singletonList;
 
-import javax.ws.rs.core.Response;
-
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -12,6 +10,8 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+
+import jakarta.ws.rs.core.Response;
 
 class KeycloakClient implements AutoCloseable {
 

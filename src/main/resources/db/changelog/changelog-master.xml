@@ -7,7 +7,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
 	<changeSet id="1" author="oliver.libutzki">
-		<createSequence sequenceName="hibernate_sequence" incrementBy="1" />
+		<createSequence sequenceName="sent_mail_seq" incrementBy="50" />
 	</changeSet>
 
 	<changeSet id="2" author="oliver.libutzki" dbms="!oracle">

@@ -1,10 +1,7 @@
 package de.libutzki.mailsender;
 
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
@@ -22,11 +19,6 @@ public class MailSenderApplication {
 
 	public static SpringApplication createSpringApplication( ) {
 		return new SpringApplication( MailSenderApplication.class );
-	}
-
-	@Bean
-	public KeycloakConfigResolver KeycloakConfigResolver( ) {
-		return new KeycloakSpringBootConfigResolver( );
 	}
 
 }

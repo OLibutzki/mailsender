@@ -83,17 +83,16 @@ class Stage_08_MailSenderApplicationIntegrationTest {
 
 	@DynamicPropertySource
 	static void configureKeycloak( final DynamicPropertyRegistry registry ) {
-		registry.add( "keycloak.auth-server-url", Stage_08_MailSenderApplicationIntegrationTest::getAuthServerURL );
+		registry.add( "spring.security.oauth2.client.provider.keycloak.issuer-uri", Stage_08_MailSenderApplicationIntegrationTest::getIssuerURI);
 	}
 
-	private static String getAuthServerURL( ) {
+	private static String getIssuerURI( ) {
 		return String.format(
-				"http://%s:%s%s",
+				"http://%s:%s%srealms/Mailsender/",
 				hostname,
 				keycloakContainer.getHttpPort( ),
 				keycloakContainer.getContextPath( ) );
 	}
-
 	@DynamicPropertySource
 	static void configureMail( final DynamicPropertyRegistry registry ) {
 		registry.add( "spring.mail.host", mailhogContainer::getHost );

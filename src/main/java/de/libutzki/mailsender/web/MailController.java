@@ -2,9 +2,6 @@ package de.libutzki.mailsender.web;
 
 import java.security.Principal;
 
-import javax.validation.Valid;
-
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import de.libutzki.mailsender.model.NewMail;
 import de.libutzki.mailsender.service.MailService;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping( "/" )
@@ -50,9 +48,10 @@ public class MailController {
 	}
 
 	private String getEMailAddress( final Principal principal ) {
-		final KeycloakAuthenticationToken authToken = ( KeycloakAuthenticationToken ) principal;
-		final String email = authToken.getAccount( ).getKeycloakSecurityContext( ).getToken( ).getEmail( );
-		return email;
+		// final KeycloakAuthenticationToken authToken = ( KeycloakAuthenticationToken ) principal;
+		// final String email = authToken.getAccount( ).getKeycloakSecurityContext( ).getToken( ).getEmail( );
+		// return email;
+		return "example@example.com";
 	}
 
 }
