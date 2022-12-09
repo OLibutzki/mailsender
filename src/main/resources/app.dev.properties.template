@@ -4,5 +4,5 @@ spring.datasource.password=postgres
 
 spring.security.oauth2.client.provider.keycloak.issuer-uri=http://localhost:18080/realms/Mailsender
 
-keycloak.credentials.secret=6Rmtg946okLncUz9E9PkGlk0nmHxNdm9
+spring.security.oauth2.client.registration.keycloak.client-secret=6Rmtg946okLncUz9E9PkGlk0nmHxNdm9
 
