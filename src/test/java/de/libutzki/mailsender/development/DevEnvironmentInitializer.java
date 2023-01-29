@@ -18,7 +18,7 @@ class DevEnvironmentInitializer implements ApplicationContextInitializer<Configu
 	static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>( "postgres:14.1" )
 			.withReuse( true );
 
-	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:20.0.1" )
+	static KeycloakContainer keycloakContainer = new KeycloakContainer( "quay.io/keycloak/keycloak:20.0.3" )
 			.withReuse( true );
 
 	private static final Integer MAILHOG_SMTP_PORT = 1025;
